@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <script src="DataTables/jQuery-3.7.0/jquery-3.7.0.min.js"></script>
+        <script src="DataTables/datatables.min.js"></script>
+        <link rel="stylesheet" href="DataTables/datatables.min.css" />
+
+        <title>Document</title>
+    </head>
+    <body>
+        <table id="myTable" class="display">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone number</th>
+                    <th>Address</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <script>
+            $(document).ready(function () {
+                var table = $('#myTable').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    ajax: {
+                        url: 'http://13.232.225.92:8001/api/total-person/',
+                        type: 'GET',
+                        data: function (d) {
+                            d.page = Math.floor(d.start / d.length) + 1;
+                            d.size = d.length;
+                            d.sort_field = d.columns[d.order[0].column].data; // Get the column key for sorting
+                            d.sort_direction = d.order[0].dir; // Get the sorting direction
+                        },
+
+                        dataSrc: function (json) {
+                            return json.data.results;
+                        },
+                    },
+                    columns: [
+                        { data: 'id' },
+                        { data: 'name' },
+                        { data: 'email' },
+                        { data: 'phone_number' },
+                        { data: 'address' },
+                    ],
+                    drawCallback: function (settings) {
+                        var pageInfo = this.api().page.info();
+                        if (pageInfo.page + 1 < pageInfo.pages) {
+                            // Enable the "Next" button
+                            $('#myTable_next').removeClass('disabled');
+                        } else {
+                            // Disable the "Next" button
+                            $('#myTable_next').addClass('disabled');
+                        }
+
+                        if (pageInfo.page > 0) {
+                            // Enable the "Previous" button
+                            $('#myTable_previous').removeClass('disabled');
+                        } else {
+                            // Disable the "Previous" button
+                            $('#myTable_previous').addClass('disabled');
+                        }
+                    },
+                });
+            });
+        </script>
+    </body>
+</html>
